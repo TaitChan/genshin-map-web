@@ -14,8 +14,8 @@ const name = defaultSettings.title || 'genshin-map-web' // page title
 // use administrator privileges to execute the command line.
 // For example, Mac: sudo npm run
 // You can change the port by the following method:
-// port = 9527 npm run dev OR npm run dev --port = 9527
-const port = process.env.port || process.env.npm_config_port || 9527 // dev port
+// port = 2333 npm run dev OR npm run dev --port = 2333
+const port = process.env.port || process.env.npm_config_port || 2333 // dev port
 
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
