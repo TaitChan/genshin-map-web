@@ -2,6 +2,7 @@
   <div>
     <l-map
       ref="myMap"
+      class="mhy-map"
       style="width: 100vw; height: 100vh;"
       :crs="crs"
       :zoom="zoom"

@@ -2,9 +2,11 @@ import Vue from 'vue'
 import Element from 'element-ui'
 import L from 'leaflet'
 import VueIntro from 'vue-introjs'
+import 'leaflet.zoomslider'
 
 import 'element-ui/lib/theme-chalk/index.css'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.zoomslider/src/L.Control.Zoomslider.css'
 import 'intro.js/introjs.css'
 import 'intro.js/introjs-rtl.css'
 import './styles/index.scss' // global css
