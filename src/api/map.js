@@ -78,4 +78,13 @@ export function mark_map_point_list() {
     params
   })
 }
-
+export function get_point_info(point_id) {
+  return request({
+    url: '/map/point/info',
+    method: 'get',
+    params: {
+      app_sn,
+      point_id
+    }
+  })
+}

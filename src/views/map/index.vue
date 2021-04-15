@@ -25,10 +25,9 @@
         :opacity="item.isMark?0.3:1.0"
         @click="selectPoint(item.id)"
       >
-        <l-popup :content="setText(item)" />
+        <l-popup :content="popopContent" />
       </l-marker>
     </l-map>
-
     <div class="map-layer-control" :class="openLayer?'map-layer-control--visible':'map-layer-control--hidden'">
       <div class="layer-control__header">
         <h1>
@@ -98,7 +97,7 @@ import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LPopup, LControlZoom } from 'vue2-leaflet'
 import wechat from '@/assets/images/wechat.jpg'
 import { deepClone } from '@/utils'
-import { tree, info, list, get_map_pageLabel, get_icon_list, get_public_notice, get_map_anchor_list, get_spot_kinds, mark_map_point_list } from '@/api/map'
+import { tree, info, list, get_map_pageLabel, get_icon_list, get_public_notice, get_map_anchor_list, get_spot_kinds, mark_map_point_list, get_point_info } from '@/api/map'
 
 export default {
   name: 'MapPage',
@@ -134,7 +133,9 @@ export default {
       mapPageLabel: { list: [] },
       publicNotice: [],
       url: 'http://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}',
-      markers: []
+      markers: [],
+      popopContent: '',
+      selectPointInfo: { }
     }
   },
   computed: {
@@ -168,12 +169,12 @@ export default {
       const { label_list, point_list } = listData
       const markers = point_list.slice(1, 10)
       for (const point of markers) {
+        // console.log(label_list.find((item) => { return item.id === point['label_id'] }))
         point['label_name'] = label_list.find((item) => { return item.id === point['label_id'] }).name
         point['icon'] = label_list.find((item) => { return item.id === point['label_id'] }).icon
         point['isMark'] = false
         // point['oneLatLang'] = L.latLng(-point.y_pos / 64, point.x_pos / 64)
         point['oneLatLang'] = L.latLng((-point.y_pos - 2796) / 64, (point.x_pos + 4843) / 64)
-        console.log(point['oneLatLang'])
       }
       this.markers = deepClone(markers)
       this.treeData = treeData
@@ -209,6 +210,10 @@ export default {
     },
     doSomethingOnReady() {
       this.map = this.$refs.myMap.mapObject
+      this.map.on('popupopen', (e) => {
+        const point = this.markers.find(item => { return this.selectId === item.id })
+        this.setText(point)
+      })
       // console.log(this.map)
     },
     selectPoint(id) {
@@ -255,7 +260,8 @@ export default {
     markPoint(point) {
       console.log(point)
       this.markers.find((item) => { return item.id === point.id }).isMark = !point.isMark
-      this.markers = deepClone(this.markers)
+      // this.markers = deepClone(this.markers)
+      this.setText(this.markers.find((item) => { return item.id === point.id }), false)
     },
     setIcon(item) {
       const oneIcon = L.divIcon({
@@ -269,27 +275,45 @@ export default {
       })
       return oneIcon
     },
-    setText(item) {
+    async setText(item, query = true) {
+      if (query) {
+        const { info } = await get_point_info(item.id)
+        this.selectPointInfo = info
+      }
+      const info = this.selectPointInfo
       let str = ''
-      str = (item.isMark ? '取消' : '')
       let classStr = ''
+      str = (item.isMark ? '取消' : '')
       classStr = (item.isMark ? 'map-popup__switch--marked' : 'map-popup__switch--unmarked')
       // return `marker<div class="map-popup__switch ${classStr}" onclick=bbb(\'${str}\')>${str}标记</div>`
-      const expStr = item.exp ? `<div class="map-popup__exp"><label>获取：</label><div><p>` + item.exp + `</p></div></div>` : ''
-      const descStr = item.desc ? `<div class="map-popup__desc"><p><img src="` + this.baseUrl + item.desc + `"></p></div>` : ''
-      const contentStr = (item.desc || item.exp) ? `<div class="map-popup__content">${expStr}${descStr}</div>` : ''
+      const expStr = info.expansion !== '[]' ? `<div class="map-popup__exp"><label>${JSON.parse(info.expansion)[0].title}：</label><div>${JSON.parse(info.expansion)[0].content}</div></div>` : ''
+      const descStr = info.content ? `<div class="map-popup__desc">${info.content}</div>` : ''
+      const contentStr = (info.expansion || info.content) ? `<div class="map-popup__content">${expStr}${descStr}</div>` : ''
       const pointObj = { id: item.id, isMark: item.isMark }
       const htmlStr =
           `<div class="map-popup">
             <span class="map-popup__name-link"><label>名称：</label>${item['label_name']}</span>
-            <div class="map-popup__type"><label>类型：</label>xxx</div>
+            <div class="map-popup__type"><label>类型：</label>${this.findPName(this.treeData.tree, item.label_id)}</div>
             ${contentStr}
             <div class="map-popup__switch ${classStr}" onclick=markPoint(` + JSON.stringify(pointObj) + `)>${str}标记</div>
           </div>`
-      return htmlStr
+      this.popopContent = htmlStr
     },
     showLog() {
       this.$alert('这是一段内容', '更新日志', { showConfirmButton: false })
+    },
+    // 传入参数：需要遍历的json，需要匹配的id
+    findPName(tree, id) {
+      let pId = null
+      for (const item of tree) {
+        for (const jtem of item.children) {
+          if (jtem.id === id) {
+            pId = jtem.parent_id
+            break
+          }
+        }
+      }
+      return tree.find((item) => { return item.id === pId }).name
     }
   }
 }

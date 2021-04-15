@@ -1,5 +1,12 @@
 *{
   margin: 0;
+  padding: 0;
+}
+p{
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 h1{
   margin: 0;
@@ -83,6 +90,11 @@ $base-url: 'https://webstatic.mihoyo.com/app/ys-map-cn';
 .leaflet-popup-content-wrapper {
   border-radius: 4px;
 }
+.leaflet-popup-content p {
+  margin: 0;
+}
+
+
 .mhy-game-{
   &gis-marker {
     border: none;
@@ -104,7 +116,6 @@ $base-url: 'https://webstatic.mihoyo.com/app/ys-map-cn';
     }
   }
 }
-
 .map-layer-control {
   pointer-events: all;
   position: absolute;
@@ -412,8 +423,13 @@ $base-url: 'https://webstatic.mihoyo.com/app/ys-map-cn';
       background-position: 50%;
       margin-bottom: 120px;
       margin-left: -10px;
-      border: 0;
+      border: none;
       background-color: transparent;
+    }
+    &-wrap{
+      padding: 0;
+      background-color: transparent;
+      border: none;
     }
   }
   .leaflet-control-zoomslider>a.leaflet-bar-part {
@@ -437,11 +453,11 @@ $base-url: 'https://webstatic.mihoyo.com/app/ys-map-cn';
   .leaflet-control-zoomslider-wrap {
     padding: 0;
     background-color: transparent;
-    border: 0;
+    border: none;
   }
   &.leaflet-touch{
     .leaflet-control-zoomslider,.leaflet-bar{
-      border: 0;
+      border: none;
     }
   }
 }
